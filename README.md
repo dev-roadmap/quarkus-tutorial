@@ -6,4 +6,10 @@
 
 [More information](./step-01-configure-quarkus/README.md)
 
-In the first example we create a minimal REST API using Quarkus and JAX-RS.
+In the first example, we create a minimal REST API using Quarkus and JAX-RS.
+
+# 2. Configure JPA _Jakarta Persistence_
+
+[More information](./step-02-configure-jpa/README.md)
+
+In the second exaple, we add the persistence layer for our REST API. 

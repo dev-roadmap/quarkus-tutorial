@@ -2,9 +2,9 @@
 
 To build a project using Quarkus, what do you need?
 
-# 1. Configure the dependences
+# 1. Configure the dependencies
 
-As Quarkus is a Jakarta EE, we will use the Jakarta EE annotations on the code. But, for the `pom.xml` we should point to Quarkus dependencies because quarkus has a native supporte for GraalVM.
+As Quarkus is a Jakarta EE, we will use the Jakarta EE annotations on the code. But, for the `pom.xml` we should point to Quarkus dependencies because quarkus has native support for GraalVM.
 
 First we need add all dependencies to Quarkus, this can be done using dependencyManagement:
 
@@ -28,7 +28,7 @@ The for that project we will need:
   2. Add JSON Support
   3. Add Reactive Support
 
-For that we will need the following dependences:
+For that we will need the following dependencies:
 
   1. `io.quarkus:io.quarkus` for creating the REST API
   2. `io.quarkus:quarkus-resteasy-jsonb` for adding JSON serializer to REST API
@@ -65,7 +65,7 @@ We can make the build just executing:
 mvn clean package
 ```
 
-This will create two `jars` inside the target folder, the one terminating with `-runner.jar` can be executed with no depencies.
+This will create two `jars` inside the target folder, the one terminating with `-runner.jar` can be executed with no dependencies.
 
 ```bash
 $ java -jar target\quarkus-tutorial-runner.jar
@@ -79,7 +79,7 @@ __  ____  __  _____   ___  __ ____  ______
 2020-11-09 11:16:58,790 INFO  [io.quarkus] (Shutdown thread) quarkus-tutorial stopped in 0.024s
 ```
 
-This is the way we should execute for production environments, for development we can use Quarkus Maven plugin. It already do the deploy of any change on the running server:
+This is the way we should execute for production environments, for development we can use Quarkus Maven plugin. It already does the deploy of any change on the running server:
 
 ```bash
 mvn quarkus:dev
@@ -87,7 +87,7 @@ mvn quarkus:dev
 
 # 3. Adding the REST API Endpoint
 
-The latest step for creating an API is creating the code that will handle the requests. Using JAX-RS is easy, just create an class and add the annotations. 
+The latest step for creating an API is creating the code that will handle the requests. Using JAX-RS is easy, just create a class and add the annotations. 
 
 The most simple example is: 
 
@@ -124,7 +124,7 @@ public class HelloEndpoint {
 }
 ```
 
-Quarkus also have support for reactive programming, you should only used. For JAX-RS, you have just to return a `Uni` or a `CompletableFuture`.
+Quarkus also have support for reactive programming. For JAX-RS, you have just to return a `Uni` or a `CompletableFuture`.
 
 ```java
 @Path("/hello")
@@ -145,3 +145,9 @@ public class HelloEndpoint {
     }
 }
 ```
+
+# Conclusion
+
+With Quarkus you can build quickly a REST API using JAX-RS. As JAX-RS is a Jakarta EE specification, you can migrate your code with few changes to another existing implementation, but Quarkus is the lighter implementation. 
+
+Quarkus is a good choice! 
