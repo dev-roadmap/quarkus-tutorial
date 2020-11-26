@@ -70,9 +70,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "tb_users")
+@Table(name = "tb_users", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_users_username", columnNames = {
+        "username" }),
+    @UniqueConstraint(name = "uq_users_email", columnNames = {
+        "email" })
+})
 @NamedQuery(name = "User.findByUsernameAndHashedPassword", query = "SELECT usr FROM User usr WHERE usr.username = :username AND usr.hashedPassword = :hashedPassword AND usr.enabled = true")
 @NamedQuery(name = "User.findByUsername", query = "SELECT usr FROM User usr WHERE usr.username = :username")
 public class User {
@@ -264,6 +270,7 @@ public class User {
                 + ", lastName=" + lastName + ", admin=" + admin + ", hashedPassword=" + hashedPassword + ", enabled="
                 + enabled + "]";
     }
+
 }
 ```
 
@@ -271,4 +278,126 @@ I want to point out some important things on this code. The `@Column` annotation
 
 With the `@Column` you have more options, like `required` and `unique`. You can see all options on [Jakarta Documentation](https://jakarta.ee/specifications/persistence/2.2/apidocs/javax/persistence/Column.html).
 
-For the `id` column, I have added two important annotations. `@Id` and `@GeneratedValue`are required to create a good design, but if you choose a different database probably it will have different values!
+For the `id` column, I have added two important annotations. `@Id` and `@GeneratedValue`are required to create a good design, but if you choose a different database probably it will have different values! 
+
+I have added the Unique Constraints, this is not required, but as I'm creating the database automatically, I have to do it. In a future tutorial I will teach how to use Flyway to create automatically the database using SQL.
+
+## Define the parameters
+
+Hibernate requires few parameters to configure, you can put all in `src/main/resources/application.properties`. But you can also replace it using environment variables. This will take place later in a tutorial from Microprofile Config.
+
+So we need to define the Database type and credentials and what Hibernate will do with the Schema. For production always use `quarkus.hibernate-orm.database.generation=validate`, but in our example, we will use `drop-and-create` recreating the database schema every deploy.
+
+If you need to change more configurations properties, the [Quarkus documentation has a list of all available configurations](https://quarkus.io/guides/hibernate-orm#quarkus-hibernate-orm_configuration).
+
+```properties
+quarkus.datasource.db-kind = postgresql
+quarkus.datasource.username = postgres
+quarkus.datasource.password = password
+quarkus.datasource.jdbc.url = jdbc:postgresql://localhost:5432/tutorial
+
+quarkus.hibernate-orm.database.generation=drop-and-create
+```
+
+## Creating the database
+
+To create the database, we will use Docker. So just execute the line bellow.
+
+```bash
+docker run --rm --name postgres-db -e POSTGRES_PASSWORD=password -e POSTGRES_DB=tutorial -p 5432:5432 -d postgres:13-alpine
+```
+
+If you want to use Postgres directly, just download and install it. It will work fine.
+
+## Acessing the database
+
+There is a lot of ways to access the database, but you should always use `javax.persistence.EntityManager`. I have created a service class called `Users` and added some methods to show the best way to access it.
+
+```java
+package io.vepo.tutorial.quarkus.user;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.transaction.Transactional;
+
+@Transactional
+@ApplicationScoped
+public class Users {
+    @PersistenceContext
+    EntityManager em;
+
+    public List<User> list() {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<User> query = criteriaBuilder.createQuery(User.class);
+        query.from(User.class);
+        return em.createQuery(query).getResultList();
+    }
+
+    public User create(User user) {
+        if (Objects.nonNull(user.getId())) {
+            throw new IllegalStateException("Id should be null!");
+        }
+        em.persist(user);
+        return user;
+    }
+
+    public Optional<User> findByUsername(String username) {
+        TypedQuery<User> query = em.createNamedQuery("User.findByUsername", User.class);
+        query.setParameter("username", username);
+        return query.getResultStream().findFirst();
+    }
+
+    public User get(int userId) {
+        return em.find(User.class, userId);
+    }
+}
+```
+
+### Using Criteria Builder
+
+Using Criteria Builder is a good way when you need to generate dynamically the query. You will create the query programmatically, the API is not so easy to understand because it is very powerful.
+
+### Using Named Query
+
+For me, Named Queries is the best way to execute commons queries. You have to write the query on JPQL, not SQL. JPQL is very similar to SQL, but you can use the same query in different databases, Hibernate will translate it for you. It is better to use it than custom JPQL queries because it will compile it once.
+
+### Using Query
+
+You can create the query directly. But this is not a good approach! Every time you call `createQuery` it will compile the query.
+
+```java
+public Optional<User> findByUsername(String username) {
+    TypedQuery<User> query = em.createQuery("SELECT usr FROM User usr WHERE usr.username = :username", User.class);
+    query.setParameter("username", username);
+    return query.getResultStream().findFirst();
+}
+```
+
+### Access the data directly
+
+If you have a Class and an Id, you can access the object directly.
+
+```java
+public User get(int userId) {
+    return em.find(User.class, userId);
+}
+```
+
+### Transactional Objects
+
+As we are using a transactional object, all changes we do in the JPA object it will be updated on the database. Each object read from the database is attached to the current session.
+
+# Conclusion
+
+If you want to develop fast and use databases, you should use JPA. You will not be worried about queries and knowing the JPA features and implementation, you can optimize the access from your database.
+
+# Future Readings
+* [Catálogo de Code Smells ORM](https://github.com/spgroup/ORM-Smells-Catalog)

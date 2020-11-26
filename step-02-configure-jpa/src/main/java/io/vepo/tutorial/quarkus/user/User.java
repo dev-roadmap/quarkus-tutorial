@@ -7,9 +7,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "gu_users")
+@Table(name = "tb_users", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_users_username", columnNames = {
+        "username" }),
+    @UniqueConstraint(name = "uq_users_email", columnNames = {
+        "email" })
+})
 @NamedQuery(name = "User.findByUsernameAndHashedPassword", query = "SELECT usr FROM User usr WHERE usr.username = :username AND usr.hashedPassword = :hashedPassword AND usr.enabled = true")
 @NamedQuery(name = "User.findByUsername", query = "SELECT usr FROM User usr WHERE usr.username = :username")
 public class User {
