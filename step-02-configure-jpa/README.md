@@ -395,6 +395,22 @@ public User get(int userId) {
 
 As we are using a transactional object, all changes we do in the JPA object it will be updated on the database. Each object read from the database is attached to the current session.
 
+## Executing and Testing
+
+With the database running you only need to start the Quarkus using maven.
+
+```bash
+mvn quarkus:dev
+```
+
+In our example, we have provided 3 endpoints:
+
+* List all Users: `GET /user`
+* Create an User: `POST /user`
+* Find User by Username: `GET /user/{username}`
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/f9fc24e64abbfb3aac90)
+
 # Conclusion
 
 If you want to develop fast and use databases, you should use JPA. You will not be worried about queries and knowing the JPA features and implementation, you can optimize the access from your database.
