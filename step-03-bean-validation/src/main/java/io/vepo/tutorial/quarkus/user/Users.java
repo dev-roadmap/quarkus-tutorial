@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
+import javax.validation.constraints.Size;
 
 @Transactional
 @ApplicationScoped
@@ -34,7 +35,7 @@ public class Users {
         return user;
     }
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByUsername(@Size(min = 4, max = 15) String username) {
         TypedQuery<User> query = em.createNamedQuery("User.findByUsername", User.class);
         query.setParameter("username", username);
         return query.getResultStream().findFirst();

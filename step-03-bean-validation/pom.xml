@@ -4,7 +4,7 @@
 >
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.vepo</groupId>
-    <artifactId>quarkus-tutorial</artifactId>
+    <artifactId>quarkus-tutorial-03</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <properties>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>

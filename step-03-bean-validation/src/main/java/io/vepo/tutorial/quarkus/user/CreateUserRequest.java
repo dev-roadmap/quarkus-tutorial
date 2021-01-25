@@ -2,7 +2,10 @@ package io.vepo.tutorial.quarkus.user;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import io.vepo.tutorial.quarkus.infra.ReservedWord;
 
 public class CreateUserRequest {
 
@@ -12,6 +15,9 @@ public class CreateUserRequest {
 
     @Size(min = 4, max = 15, message = "username should have size [{min},{max}]")
     @NotBlank(message = "username may not be blank")
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]+$", message = "\"username\" should start with a letter and should only accept letters and numbers")
+    @ReservedWord("admin")
+    @ReservedWord("root")
     private String username;
 
     @NotBlank(message = "firstName may not be blank")
